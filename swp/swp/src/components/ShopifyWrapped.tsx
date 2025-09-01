@@ -1,11 +1,25 @@
 import { useState, useEffect } from 'react'
 import {
+  useCurrentUser,
   useOrders,
   useSavedProducts,
   useRecentProducts,
   useFollowedShops,
   useBuyerAttributes,
   useRecentShops,
+  useCuratedProducts,
+  usePopularProducts,
+  useProductLists,
+  useRecommendedProducts,
+  useRecommendedShops,
+  useCloseMini,
+  useDeeplink,
+  useShopNavigation,
+  useAsyncStorage,
+  useGenerateUserToken,
+  useShare,
+  useErrorScreen,
+  useErrorToast,
 } from '@shopify/shop-minis-react'
 
 interface SlideProps {
@@ -342,6 +356,200 @@ function PersonalitySlide({ onNext, onPrevious, currentSlide, totalSlides }: Sli
   )
 }
 
+// Comprehensive Data Slide - showing all available hook data
+function AllDataSlide({ onNext, onPrevious, currentSlide, totalSlides }: SlideProps) {
+  // User hooks
+  const currentUser = useCurrentUser()
+  const { orders } = useOrders()
+  const { products: savedProducts } = useSavedProducts()
+  const { products: recentProducts } = useRecentProducts()
+  const { shops: followedShops } = useFollowedShops()
+  const { buyerAttributes } = useBuyerAttributes()
+  const { shops: recentShops } = useRecentShops()
+  
+  // Product hooks (with error handling)
+  let curatedProducts, popularProducts, productLists, recommendedProducts, recommendedShops
+  
+  try {
+    const curatedResult = useCuratedProducts({ handle: 'featured', first: 10 })
+    curatedProducts = curatedResult.products
+  } catch (error) {
+    curatedProducts = []
+  }
+  
+  try {
+    const popularResult = usePopularProducts()
+    popularProducts = popularResult.products
+  } catch (error) {
+    popularProducts = []
+  }
+  
+  try {
+    const listsResult = useProductLists()
+    productLists = listsResult.productLists
+  } catch (error) {
+    productLists = []
+  }
+  
+  try {
+    const recommendedProductsResult = useRecommendedProducts()
+    recommendedProducts = recommendedProductsResult.products
+  } catch (error) {
+    recommendedProducts = []
+  }
+  
+  // Shop hooks
+  try {
+    const recommendedShopsResult = useRecommendedShops()
+    recommendedShops = recommendedShopsResult.shops
+  } catch (error) {
+    recommendedShops = []
+  }
+  
+  // Navigation hooks
+  let closeMini, deeplink, shopNavigation
+  try {
+    closeMini = useCloseMini()
+  } catch (error) {
+    closeMini = null
+  }
+  
+  try {
+    deeplink = useDeeplink()
+  } catch (error) {
+    deeplink = null
+  }
+  
+  try {
+    shopNavigation = useShopNavigation()
+  } catch (error) {
+    shopNavigation = null
+  }
+  
+  // Storage hooks
+  let asyncStorage, generateUserToken
+  try {
+    asyncStorage = useAsyncStorage()
+  } catch (error) {
+    asyncStorage = null
+  }
+  
+  try {
+    generateUserToken = useGenerateUserToken()
+  } catch (error) {
+    generateUserToken = null
+  }
+  
+  // Utility hooks
+  let share, showErrorScreen, showErrorToast
+  try {
+    share = useShare()
+  } catch (error) {
+    share = null
+  }
+  
+  try {
+    showErrorScreen = useErrorScreen()
+  } catch (error) {
+    showErrorScreen = null
+  }
+  
+  try {
+    showErrorToast = useErrorToast()
+  } catch (error) {
+    showErrorToast = null
+  }
+
+  const dataPoints = [
+    { label: 'Current User', value: currentUser ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Orders Count', value: orders?.length || 0, type: 'number' },
+    { label: 'Saved Products', value: savedProducts?.length || 0, type: 'number' },
+    { label: 'Recent Products', value: recentProducts?.length || 0, type: 'number' },
+    { label: 'Followed Shops', value: followedShops?.length || 0, type: 'number' },
+    { label: 'Recent Shops', value: recentShops?.length || 0, type: 'number' },
+    { label: 'Buyer Attributes', value: buyerAttributes ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Gender Affinity', value: buyerAttributes?.genderAffinity || 'N/A', type: 'text' },
+    { label: 'Category Affinities', value: buyerAttributes?.categoryAffinities?.length || 0, type: 'number' },
+    { label: 'Curated Products', value: curatedProducts?.length || 0, type: 'number' },
+    { label: 'Popular Products', value: popularProducts?.length || 0, type: 'number' },
+    { label: 'Product Lists', value: productLists?.length || 0, type: 'number' },
+    { label: 'Recommended Products', value: recommendedProducts?.length || 0, type: 'number' },
+    { label: 'Recommended Shops', value: recommendedShops?.length || 0, type: 'number' },
+    { label: 'Close Mini Function', value: closeMini ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Deeplink Data', value: deeplink ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Shop Navigation', value: shopNavigation ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Async Storage', value: asyncStorage ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'User Token Generator', value: generateUserToken ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Share Function', value: share ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Error Screen', value: showErrorScreen ? 'Available' : 'Not Available', type: 'status' },
+    { label: 'Error Toast', value: showErrorToast ? 'Available' : 'Not Available', type: 'status' },
+  ]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-cyan-500 to-purple-600 flex flex-col justify-center items-center text-white p-4">
+      <div className="text-center space-y-4 animate-fadeIn max-w-4xl w-full">
+        <h1 className="text-2xl font-bold mb-4">Complete Data Overview</h1>
+        <div className="text-4xl mb-4">📊</div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-4">
+          {dataPoints.map((point, index) => (
+            <div key={index} className="glass rounded-lg p-3 text-sm">
+              <div className="font-semibold text-xs opacity-75 mb-1">{point.label}</div>
+              <div className={`text-lg font-bold ${
+                point.type === 'status' 
+                  ? point.value === 'Available' ? 'text-green-300' : 'text-red-300'
+                  : point.type === 'number' 
+                    ? 'text-blue-200' 
+                    : 'text-white'
+              }`}>
+                {point.value}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Additional detailed sections */}
+        <div className="mt-6 space-y-3 max-w-2xl">
+          {deeplink && Object.keys(deeplink).length > 0 && (
+            <div className="glass rounded-lg p-3">
+              <div className="text-sm font-semibold mb-2">Deeplink Details:</div>
+              <div className="text-xs opacity-90">{JSON.stringify(deeplink, null, 2)}</div>
+            </div>
+          )}
+          
+          {buyerAttributes && (
+            <div className="glass rounded-lg p-3">
+              <div className="text-sm font-semibold mb-2">Buyer Attributes Details:</div>
+              <div className="text-xs opacity-90">
+                Gender: {buyerAttributes.genderAffinity || 'N/A'}<br/>
+                Categories: {buyerAttributes.categoryAffinities?.join(', ') || 'N/A'}
+              </div>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex gap-4 mt-8">
+          <button
+            onClick={onPrevious}
+            className="glass text-white px-6 py-3 rounded-full font-semibold hover:bg-white/30 transition-colors"
+          >
+            Previous
+          </button>
+          <button
+            onClick={onNext}
+            className="bg-white text-cyan-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+      <div className="absolute bottom-6 text-sm opacity-75">
+        {currentSlide + 1} / {totalSlides}
+      </div>
+    </div>
+  )
+}
+
 // Final Summary Slide
 function SummarySlide({ onPrevious, currentSlide, totalSlides }: SlideProps) {
   const { orders } = useOrders()
@@ -409,6 +617,7 @@ export function ShopifyWrapped() {
     RecentActivitySlide,
     FollowedShopsSlide,
     PersonalitySlide,
+    AllDataSlide,
     SummarySlide
   ]
   
