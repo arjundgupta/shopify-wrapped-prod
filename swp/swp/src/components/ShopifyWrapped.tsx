@@ -9,6 +9,7 @@ import {
     useRecentShops,
     useCurrentUser,
 } from "@shopify/shop-minis-react";
+import { DebugPanel } from "./DebugPanel";
 
 // Import all story cards
 import { WelcomeCard } from "./story-cards/WelcomeCard";
@@ -165,6 +166,13 @@ export function ShopifyWrapped() {
                     ))}
                 </div>
             </div>
+
+            {/* Debug panel (separate component) */}
+            <DebugPanel
+                storyData={storyData}
+                currentSlide={currentSlide}
+                slidesCount={totalSlides}
+            />
         </div>
     );
 }
