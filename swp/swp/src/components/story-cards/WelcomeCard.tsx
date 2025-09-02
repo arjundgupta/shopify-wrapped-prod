@@ -1,6 +1,7 @@
 import { StoryCardProps } from './types'
+import { InteractiveProgressIndicator } from './InteractiveProgressIndicator'
 
-export function WelcomeCard({ onNext, onPrevious, currentSlide, totalSlides, data }: StoryCardProps) {
+export function WelcomeCard({ currentSlide, totalSlides, onNext, onJumpToSlide }: StoryCardProps) {
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex flex-col justify-center items-center text-white p-6">
       {/* Animated background elements */}
@@ -49,12 +50,20 @@ export function WelcomeCard({ onNext, onPrevious, currentSlide, totalSlides, dat
         {/* Enhanced CTA button */}
         <div className="mt-12">
           <button
-            onClick={onNext}
-            className="group relative bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-16 py-5 rounded-full text-2xl font-bold overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95"
+            onClick={() => {
+              if (onNext) {
+                onNext()
+              } else {
+                // Fallback: dispatch a swipe right event
+                const event = new KeyboardEvent('keydown', { key: 'ArrowRight' })
+                document.dispatchEvent(event)
+              }
+            }}
+            className="group relative bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 text-white px-16 py-5 rounded-full text-2xl font-bold overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl active:scale-95 cursor-pointer focus:outline-none focus:ring-4 focus:ring-yellow-400/50"
           >
             <span className="relative z-10 flex items-center gap-3">
               Let's Go! 
-              <span className="text-3xl group-hover:animate-bounce">🚀</span>
+              <span className="text-3xl group-hover:animate-bounce"></span>
             </span>
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div className="absolute inset-0 animate-pulse-ring"></div>
@@ -62,19 +71,23 @@ export function WelcomeCard({ onNext, onPrevious, currentSlide, totalSlides, dat
         </div>
         
         {/* Enhanced instruction text */}
-        <div className="mt-8 text-white/60 font-medium">
-          <div className="flex items-center justify-center gap-2 text-sm">
-            <span>👆</span>
-            <span>Swipe or tap to navigate through your story</span>
-            <span>👆</span>
+        <div className="mt-8 text-white/70 font-medium animate-pulse">
+          <div className="flex items-center justify-center gap-3 text-sm">
+            <span className="animate-bounce">👆</span>
+            <span className="text-center">
+              Tap the button above or swipe to start your story
+            </span>
+            <span className="animate-bounce delay-200">👆</span>
           </div>
         </div>
       </div>
       
-      {/* Enhanced progress indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/50 font-medium bg-black/20 px-4 py-2 rounded-full backdrop-blur-sm">
-        {currentSlide + 1} / {totalSlides}
-      </div>
+      {/* Interactive progress indicator */}
+      <InteractiveProgressIndicator
+        currentSlide={currentSlide}
+        totalSlides={totalSlides}
+        onJumpToSlide={onJumpToSlide}
+      />
 
       {/* Gradient overlay for better text contrast */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 pointer-events-none"></div>

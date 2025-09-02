@@ -1,7 +1,8 @@
 import { StoryCardProps } from './types'
 import { determineShoppingPersona } from '../../utils/shoppingAnalytics'
+import { InteractiveProgressIndicator } from './InteractiveProgressIndicator'
 
-export function ShoppingPersonaCard({ onNext, onPrevious, currentSlide, totalSlides, data }: StoryCardProps) {
+export function ShoppingPersonaCard({ currentSlide, totalSlides, data, onJumpToSlide }: StoryCardProps) {
   const persona = determineShoppingPersona(data.orders, data.savedProducts, data.followedShops, data.curatedProducts)
   
   const personaEmojis: { [key: string]: string } = {
@@ -110,28 +111,14 @@ export function ShoppingPersonaCard({ onNext, onPrevious, currentSlide, totalSli
           </div>
         </div>
         
-        {/* Enhanced navigation buttons */}
-        <div className="flex gap-6 mt-10">
-          <button
-            onClick={onPrevious}
-            className="group backdrop-blur-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-xl"
-          >
-            <span className="group-hover:-translate-x-1 transition-transform duration-200">← Previous</span>
-          </button>
-          <button
-            onClick={onNext}
-            className="group bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-400 hover:to-fuchsia-400 text-white px-10 py-4 rounded-2xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-2xl relative overflow-hidden"
-          >
-            <span className="relative z-10 group-hover:translate-x-1 transition-transform duration-200">Next →</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </button>
-        </div>
       </div>
       
-      {/* Enhanced progress indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 backdrop-blur-sm bg-black/20 px-6 py-3 rounded-full text-white/70 font-medium border border-white/10">
-        {currentSlide + 1} / {totalSlides}
-      </div>
+      {/* Interactive progress indicator */}
+      <InteractiveProgressIndicator
+        currentSlide={currentSlide}
+        totalSlides={totalSlides}
+        onJumpToSlide={onJumpToSlide}
+      />
 
       {/* Enhanced gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>

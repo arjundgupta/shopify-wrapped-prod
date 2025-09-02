@@ -74,6 +74,12 @@ export function ShopifyWrapped() {
   const previousSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)
   }
+
+  const jumpToSlide = (slideIndex: number) => {
+    if (slideIndex >= 0 && slideIndex < totalSlides) {
+      setCurrentSlide(slideIndex)
+    }
+  }
   
   const CurrentSlideComponent = slides[currentSlide]
   
@@ -131,11 +137,11 @@ export function ShopifyWrapped() {
   return (
     <div className="relative overflow-hidden">
       <CurrentSlideComponent
-        onNext={nextSlide}
-        onPrevious={previousSlide}
         currentSlide={currentSlide}
         totalSlides={totalSlides}
         data={storyData}
+        onNext={currentSlide === 0 ? nextSlide : undefined}
+        onJumpToSlide={jumpToSlide}
       />
       
       {/* Progress bar */}

@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-
 export interface StoryCardData {
   orders: any[]
   savedProducts: any[]
@@ -11,11 +9,11 @@ export interface StoryCardData {
 }
 
 export interface StoryCardProps {
-  onNext: () => void
-  onPrevious: () => void
   currentSlide: number
   totalSlides: number
   data: StoryCardData
+  onNext?: () => void // Optional navigation function for welcome card
+  onJumpToSlide?: (slideIndex: number) => void // Optional function to jump to specific slide
 }
 
 export interface CardData {

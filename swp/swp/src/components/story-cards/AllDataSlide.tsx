@@ -1,6 +1,7 @@
 import { StoryCardProps } from './types'
+import { InteractiveProgressIndicator } from './InteractiveProgressIndicator'
 
-export function AllDataSlide({ onNext, onPrevious, currentSlide, totalSlides, data }: StoryCardProps) {
+export function AllDataSlide({ currentSlide, totalSlides, data, onJumpToSlide }: StoryCardProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-800 to-black flex flex-col justify-center items-center text-white p-6">
       <div className="text-center space-y-6 animate-fadeIn max-w-4xl">
@@ -53,24 +54,14 @@ export function AllDataSlide({ onNext, onPrevious, currentSlide, totalSlides, da
           </div>
         </div>
         
-        <div className="flex gap-4 mt-8">
-          <button
-            onClick={onPrevious}
-            className="glass text-white px-6 py-3 rounded-full font-semibold hover:bg-white/30 transition-colors"
-          >
-            Previous
-          </button>
-          <button
-            onClick={onNext}
-            className="bg-white text-gray-800 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Next
-          </button>
-        </div>
       </div>
-      <div className="absolute bottom-6 text-sm opacity-75">
-        {currentSlide + 1} / {totalSlides}
-      </div>
+      
+      {/* Interactive progress indicator */}
+      <InteractiveProgressIndicator
+        currentSlide={currentSlide}
+        totalSlides={totalSlides}
+        onJumpToSlide={onJumpToSlide}
+      />
     </div>
   )
 }
