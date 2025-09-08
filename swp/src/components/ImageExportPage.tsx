@@ -385,244 +385,247 @@ export function ImageExportPage({ data, onBack }: ImageExportPageProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <div className="min-h-screen bg-white">
             {/* Success Message */}
             {showSuccessMessage && (
-                <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-20 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-                    ✅ Image ready! Check the new tab to save to Photos.
+                <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-20 bg-black text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    ✓ Image ready! Check the new tab to save to Photos.
                 </div>
             )}
             
-            {/* Header */}
-            <div className="p-4 flex items-center justify-between">
-                <button
-                    onClick={onBack}
-                    className="flex items-center space-x-2 text-white/80 hover:text-white transition-colors"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    <span>Back to Wrapped</span>
-                </button>
-                <h1 className="text-xl font-bold text-white">Export as Image</h1>
-                <div className="w-24"></div>
+            {/* Minimal Header */}
+            <div className="p-6 border-b border-gray-100">
+                <div className="flex items-center justify-between max-w-4xl mx-auto">
+                    <button
+                        onClick={onBack}
+                        className="flex items-center space-x-2 text-gray-600 hover:text-black transition-colors text-sm font-medium"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        <span>Back</span>
+                    </button>
+                    <h1 className="text-lg font-semibold text-black">Export Images</h1>
+                    <div className="w-16"></div>
+                </div>
             </div>
 
             {capturedImage || capturedImages.length > 0 ? (
                 /* Show captured image(s) with actions */
-                <div className="p-4 space-y-4">
+                <div className="p-4 max-w-4xl mx-auto">
                     {capturedImage ? (
                         /* Single image result */
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-white mb-4">Image Captured! 📸</h2>
-                            <div className="bg-white rounded-lg p-4 max-w-sm mx-auto shadow-2xl">
-                                <img 
-                                    src={capturedImage} 
-                                    alt={`Shopify Wrapped - ${slideNames[selectedSlide]}`}
-                                    className="w-full h-auto rounded-lg"
-                                />
+                        <div className="grid md:grid-cols-2 gap-6 items-start">
+                            <div>
+                                <div className="text-center mb-4">
+                                    <h2 className="text-lg font-semibold text-black mb-1">Image Ready</h2>
+                                    <p className="text-gray-600 text-sm">{slideNames[selectedSlide]}</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={shareImage}
+                                        className="w-full bg-black hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                                    >
+                                        Save to Photos
+                                    </button>
+                                    
+                                    <button
+                                        onClick={downloadImage}
+                                        className="w-full bg-gray-100 hover:bg-gray-200 text-black font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                                    >
+                                        Download
+                                    </button>
+
+                                    <button
+                                        onClick={() => setCapturedImage(null)}
+                                        className="w-full text-gray-500 hover:text-gray-700 font-medium py-2 text-sm transition-colors"
+                                    >
+                                        Choose Different Slide
+                                    </button>
+                                </div>
+                            </div>
+                            <div className="flex justify-center">
+                                <div className="bg-gray-50 rounded-lg p-3 border max-w-xs">
+                                    <img 
+                                        src={capturedImage} 
+                                        alt={`Shopify Wrapped - ${slideNames[selectedSlide]}`}
+                                        className="w-full h-auto rounded"
+                                    />
+                                </div>
                             </div>
                         </div>
                     ) : (
                         /* Multiple images result */
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-white mb-4">All Images Captured! 🎉</h2>
-                            <p className="text-white/80 mb-6">Successfully captured {capturedImages.length} slides</p>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                        <div className="space-y-4">
+                            <div className="text-center">
+                                <h2 className="text-lg font-semibold text-black mb-1">All Images Ready</h2>
+                                <p className="text-gray-600 text-sm">{capturedImages.length} slides captured</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 mb-4">
                                 {capturedImages.map((image, index) => (
-                                    <div key={index} className="bg-white rounded-lg p-2 shadow-lg">
+                                    <div key={index} className="bg-gray-50 rounded-md p-1 border">
                                         <img 
-                                            src={image.url} 
+                                            src={image.url}
                                             alt={`Shopify Wrapped - ${image.name}`}
                                             className="w-full h-auto rounded"
                                         />
-                                        <p className="text-xs text-gray-600 mt-1 text-center">{image.name}</p>
+                                        <p className="text-xs text-gray-600 mt-1 text-center truncate">{image.name}</p>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-                    )}
-
-                    <div className="flex flex-col space-y-3 max-w-sm mx-auto">
-                        {capturedImage ? (
-                            /* Single image actions */
-                            <>
-                                <button
-                                    onClick={shareImage}
-                                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                                    </svg>
-                                    <span>Save to Photos</span>
-                                </button>
-                                
-                                <button
-                                    onClick={downloadImage}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                    <span>Download</span>
-                                </button>
-
-                                <button
-                                    onClick={() => setCapturedImage(null)}
-                                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                                >
-                                    Choose Different Slide
-                                </button>
-                            </>
-                        ) : (
-                            /* Multiple images actions */
-                            <>
+                            
+                            <div className="flex justify-center space-x-3">
                                 <button
                                     onClick={() => downloadAllImages(capturedImages)}
                                     disabled={isCapturing}
-                                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                                    className="bg-black hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-6 rounded-md transition-colors text-sm"
                                 >
                                     {isCapturing ? (
-                                        <>
+                                        <span className="flex items-center justify-center space-x-2">
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            <span>Downloading...</span>
-                                        </>
+                                            <span>Processing...</span>
+                                        </span>
                                     ) : (
-                                        <>
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                            </svg>
-                                            <span>
-                                                {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
-                                                    ? `View All ${capturedImages.length} Images` 
-                                                    : `Download All ${capturedImages.length} Images`}
-                                            </span>
-                                        </>
+                                        <span>
+                                            {/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                                                ? `View All ${capturedImages.length} Images` 
+                                                : `Download All ${capturedImages.length} Images`}
+                                        </span>
                                     )}
                                 </button>
 
                                 <button
                                     onClick={() => setCapturedImages([])}
-                                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                                    className="text-gray-500 hover:text-gray-700 font-medium py-2.5 px-4 text-sm transition-colors"
                                 >
-                                    Capture More
+                                    Capture Again
                                 </button>
-                            </>
-                        )}
-                    </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 /* Show slide selection and preview */
-                <div className="p-4 space-y-6">
-                    <div className="text-center">
-                        <h2 className="text-2xl font-bold text-white mb-6">
+                <div className="p-4 max-w-6xl mx-auto">
+                    <div className="text-center mb-6">
+                        <h2 className="text-lg font-semibold text-black mb-1">
                             {isBulkCapturing ? 'Capturing All Slides...' : 'Choose a slide to export'}
                         </h2>
-                        
-                        {/* Slide Selector */}
-                        <div className="grid grid-cols-3 gap-3 max-w-2xl mx-auto mb-6">
-                            {slideNames.map((name, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setSelectedSlide(index)}
-                                    className={`relative overflow-hidden rounded-lg transition-all duration-300 p-3 ${
-                                        selectedSlide === index
-                                            ? 'ring-3 ring-white scale-105 shadow-lg bg-white/20'
-                                            : 'hover:scale-102 opacity-80 hover:opacity-100 bg-white/10 hover:bg-white/15'
-                                    }`}
-                                >
-                                    <div className="text-white font-medium text-sm">
-                                        {name}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Live Preview of Selected Slide */}
-                    <div className="text-center">
-                        <h3 className="text-lg font-semibold text-white mb-4">Preview: {slideNames[selectedSlide]}</h3>
-                        <div 
-                            ref={slideRef}
-                            className="mx-auto relative bg-transparent overflow-hidden"
-                            style={{
-                                width: '375px',
-                                height: '812px',
-                                transform: 'scale(0.75)',
-                                transformOrigin: 'center top'
-                            }}
-                        >
-                            <SelectedSlideComponent
-                                currentSlide={selectedSlide}
-                                totalSlides={slides.length}
-                                data={data}
-                                onNext={() => {}}
-                                onJumpToSlide={() => {}}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Capture Button */}
-                    <div className="text-center space-y-4">
-                        <button
-                            onClick={captureSingleSlide}
-                            disabled={isCapturing || isBulkCapturing}
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-2 mx-auto shadow-lg"
-                        >
-                            {isCapturing ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    <span>Capturing...</span>
-                                </>
-                            ) : (
-                                <>
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span>Capture This Slide</span>
-                                </>
-                            )}
-                        </button>
-                        
-                        {/* Export All Button */}
-                        <button
-                            onClick={captureAllSlides}
-                            disabled={isCapturing || isBulkCapturing}
-                            className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-2 mx-auto shadow-lg"
-                        >
-                            {isBulkCapturing ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                                    <span>Capturing {Math.round(bulkProgress)}%</span>
-                                </>
-                            ) : (
-                                <>
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span>Export All {slides.length} Slides</span>
-                                </>
-                            )}
-                        </button>
-                        
-                        {isBulkCapturing && (
-                            <div className="w-full max-w-md mx-auto">
-                                <div className="bg-white/20 rounded-full h-2 overflow-hidden">
-                                    <div 
-                                        className="bg-green-400 h-full transition-all duration-300"
-                                        style={{ width: `${bulkProgress}%` }}
-                                    />
-                                </div>
-                                <p className="text-white/80 text-sm text-center mt-2">
-                                    Capturing slide {Math.ceil(bulkProgress / 100 * slides.length)} of {slides.length}
-                                </p>
-                            </div>
+                        {!isBulkCapturing && (
+                            <p className="text-gray-600 text-sm">Select a slide to preview and capture</p>
                         )}
-                        {isMobileDevice() && (
-                            <p className="text-white/70 text-sm mt-3 max-w-md mx-auto">
-                                📱 On iPhone: The image will open in a new tab. Tap and hold to save to Photos.
-                            </p>
+                    </div>
+                    
+                    <div className="grid md:grid-cols-2 gap-6 items-start">
+                        {/* Left Column: Slide Selector and Actions */}
+                        <div className="space-y-4">
+                            {!isBulkCapturing && (
+                                /* Slide Selector */
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-900 mb-3">Select Slide</h3>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {slideNames.map((name, index) => (
+                                            <button
+                                                key={index}
+                                                onClick={() => setSelectedSlide(index)}
+                                                className={`p-2 rounded-md text-sm font-medium transition-all text-left ${
+                                                    selectedSlide === index
+                                                        ? 'bg-black text-white'
+                                                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                {name}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Capture Buttons */}
+                            <div className="space-y-2">
+                                {!isBulkCapturing && (
+                                    <button
+                                        onClick={captureSingleSlide}
+                                        disabled={isCapturing || isBulkCapturing}
+                                        className="w-full bg-black hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                                    >
+                                        {isCapturing ? (
+                                            <span className="flex items-center justify-center space-x-2">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                <span>Capturing...</span>
+                                            </span>
+                                        ) : (
+                                            'Capture This Slide'
+                                        )}
+                                    </button>
+                                )}
+                                
+                                {/* Export All Button */}
+                                <button
+                                    onClick={captureAllSlides}
+                                    disabled={isCapturing || isBulkCapturing}
+                                    className="w-full bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-black font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                                >
+                                    {isBulkCapturing ? (
+                                        <span className="flex items-center justify-center space-x-2">
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-800"></div>
+                                            <span>Capturing {Math.round(bulkProgress)}%</span>
+                                        </span>
+                                    ) : (
+                                        `Capture All ${slides.length} Slides`
+                                    )}
+                                </button>
+                                
+                                {isBulkCapturing && (
+                                    <div className="text-center">
+                                        <div className="bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                            <div 
+                                                className="bg-black h-full transition-all duration-300"
+                                                style={{ width: `${bulkProgress}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-gray-600 text-xs mt-1">
+                                            Slide {Math.ceil(bulkProgress / 100 * slides.length)} of {slides.length}
+                                        </p>
+                                    </div>
+                                )}
+                                
+                                {isMobileDevice() && (
+                                    <p className="text-gray-500 text-xs text-center mt-2">
+                                        📱 Tap and hold image to save to Photos
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        
+                        {/* Right Column: Preview */}
+                        {!isBulkCapturing && (
+                            <div className="flex justify-center">
+                                <div className="bg-gray-50 rounded-lg p-3 border">
+                                    <div className="text-center mb-2">
+                                        <span className="text-xs font-medium text-gray-600">{slideNames[selectedSlide]}</span>
+                                    </div>
+                                    <div 
+                                        ref={slideRef}
+                                        className="mx-auto relative bg-transparent overflow-hidden rounded"
+                                        style={{
+                                            width: '187.5px',  // 375px * 0.5
+                                            height: '406px',   // 812px * 0.5
+                                            transform: 'scale(0.5)',
+                                            transformOrigin: 'center top'
+                                        }}
+                                    >
+                                        <SelectedSlideComponent
+                                            currentSlide={selectedSlide}
+                                            totalSlides={slides.length}
+                                            data={data}
+                                            onNext={() => {}}
+                                            onJumpToSlide={() => {}}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -630,49 +633,46 @@ export function ImageExportPage({ data, onBack }: ImageExportPageProps) {
 
             {/* Mobile Gallery Overlay */}
             {showMobileGallery && (
-                <div className="fixed inset-0 bg-black bg-opacity-90 z-50 overflow-y-auto">
-                    <div className="min-h-screen p-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-white text-xl font-bold">Your Shopify Wrapped Images</h2>
+                <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+                    <div className="min-h-screen p-6">
+                        <div className="flex justify-between items-center mb-6 max-w-4xl mx-auto">
+                            <h2 className="text-xl font-semibold text-black">Your Images</h2>
                             <button
                                 onClick={() => setShowMobileGallery(false)}
-                                className="text-white text-2xl hover:text-gray-300"
+                                className="text-gray-600 hover:text-black text-2xl font-light"
                             >
-                                ✕
+                                ×
                             </button>
                         </div>
                         
-                        <p className="text-white/80 text-sm mb-6 text-center">
-                            📱 Tap and hold each image to save it to your Photos
+                        <p className="text-gray-600 text-sm mb-8 text-center max-w-md mx-auto">
+                            Tap and hold each image to save it to your Photos
                         </p>
                         
-                        <div className="grid grid-cols-1 gap-4 max-w-md mx-auto">
-                            {capturedImages.map((image, index) => (
-                                <div key={index} className="bg-white/10 rounded-lg p-4">
-                                    <h3 className="text-white text-center mb-2 font-medium">
+                        <div className="grid grid-cols-1 gap-6 max-w-md mx-auto">
+                            {capturedImages.map((image: any, index: number) => (
+                                <div key={index} className="bg-gray-50 rounded-lg p-4 border">
+                                    <h3 className="text-black text-center mb-3 font-medium text-sm">
                                         {image.name}
                                     </h3>
                                     <img
                                         src={image.url}
                                         alt={`Shopify Wrapped - ${image.name}`}
-                                        className="w-full rounded-lg shadow-lg"
+                                        className="w-full rounded-lg"
                                         style={{ 
                                             maxWidth: '100%',
                                             height: 'auto',
                                             touchAction: 'manipulation'
                                         }}
                                     />
-                                    <p className="text-white/60 text-xs text-center mt-2">
-                                        Tap and hold to save
-                                    </p>
                                 </div>
                             ))}
                         </div>
                         
-                        <div className="text-center mt-6">
+                        <div className="text-center mt-8">
                             <button
                                 onClick={() => setShowMobileGallery(false)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium"
+                                className="bg-black hover:bg-gray-800 text-white px-6 py-3 rounded-lg font-medium text-sm"
                             >
                                 Done
                             </button>
