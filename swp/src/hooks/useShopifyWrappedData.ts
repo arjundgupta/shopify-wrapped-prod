@@ -1,28 +1,19 @@
 import {
-  useCurrentUser,
   useOrders,
   useSavedProducts,
   useRecentProducts,
   useFollowedShops,
   useBuyerAttributes,
   useRecentShops,
+  useCuratedProducts,
+  useRecommendedProducts,
+  useProductList,
+  useProductLists,
 } from '@shopify/shop-minis-react'
+import type { StoryCardData } from '../components/story-cards/types'
+import type { Product } from '../utils/shoppingAnalytics'
 
-export interface ShopifyWrappedData {
-  user: any
-  orders: any[]
-  savedProducts: any[]
-  recentProducts: any[]
-  followedShops: any[]
-  recentShops: any[]
-  buyerAttributes: any
-  isLoading: boolean
-  totalSpent: number
-  avgOrderValue: number
-}
-
-export function useShopifyWrappedData(): ShopifyWrappedData {
-  const currentUserData = useCurrentUser()
+export function useShopifyWrappedData(): StoryCardData {
   const { orders } = useOrders()
   const { products: savedProducts } = useSavedProducts()
   const { products: recentProducts } = useRecentProducts()
@@ -30,117 +21,85 @@ export function useShopifyWrappedData(): ShopifyWrappedData {
   const { shops: recentShops } = useRecentShops()
   const { buyerAttributes } = useBuyerAttributes()
 
-  // Calculate derived data - using safer approach for order totals
-  const totalSpent = orders?.reduce((sum, order) => {
-    // Try different possible price properties
-    const price = order.total?.amount || order.totalPrice || order.price || 0
-    return sum + (typeof price === 'string' ? parseFloat(price) : price)
-  }, 0) || 0
+  // Curated products hook can throw if used outside provider - keep try/catch
+  let curatedProducts: Product[] = [];
 
-  const avgOrderValue = orders?.length ? totalSpent / orders.length : 0
+  // Helper to normalize various hook return shapes into Product[]
+  const normalizeProducts = (res: any): Product[] => {
+      if (!res) return [];
+      if (Array.isArray(res)) return res as Product[];
+      if (res.products && Array.isArray(res.products))
+          return res.products as Product[];
+      if (res.items && Array.isArray(res.items))
+          return res.items as Product[];
+      if (res.results && Array.isArray(res.results))
+          return res.results as Product[];
+      return [];
+  };
 
-  // Determine loading state - we'll consider it loading if any critical data is still loading
-  const isLoading = !currentUserData && !orders && !savedProducts
+  const normalizeProductLists = (res: any): Product[][] => {
+      if (!res) return [];
+      if (Array.isArray(res)) {
+          // Could be array of products or array of lists
+          if (res.length === 0) return [];
+          if (Array.isArray(res[0])) return res as Product[][]; // already arrays
+          // array of list objects
+          return (res as any[]).map((l) => normalizeProducts(l));
+      }
+      if (res.lists && Array.isArray(res.lists))
+          return res.lists.map((l: any) => normalizeProducts(l));
+      if (res.productLists && Array.isArray(res.productLists))
+          return res.productLists.map((l: any) => normalizeProducts(l));
+      return [];
+  };
+
+  try {
+      const result = useCuratedProducts({ handle: "featured", first: 10 });
+      curatedProducts = normalizeProducts(result);
+  } catch (error) {
+      console.warn("Curated products not available:", error);
+      curatedProducts = [];
+  }
+
+  // Recommended products and product lists (some hooks may not be available in all SDK versions)
+  let recommendedProducts: Product[] = [];
+  let productList: Product[] = [];
+  let productLists: Product[][] = [];
+
+  try {
+      const res = useRecommendedProducts?.();
+      recommendedProducts = normalizeProducts(res);
+  } catch (error) {
+      console.warn("Recommended products not available:", error);
+      recommendedProducts = [];
+  }
+
+  try {
+      const res = useProductList?.();
+      productList = normalizeProducts(res);
+  } catch (error) {
+      console.warn("useProductList not available:", error);
+      productList = [];
+  }
+
+  try {
+      const res = useProductLists?.();
+      productLists = normalizeProductLists(res);
+  } catch (error) {
+      console.warn("useProductLists not available:", error);
+      productLists = [];
+  }
 
   return {
-    user: currentUserData,
-    orders: orders || [],
+    orders: (orders as any) || [],
     savedProducts: savedProducts || [],
-    recentProducts: recentProducts || [],
     followedShops: followedShops || [],
+    curatedProducts: curatedProducts || [],
+    recentProducts: recentProducts || [],
+    buyerAttributes: buyerAttributes || null,
     recentShops: recentShops || [],
-    buyerAttributes,
-    isLoading,
-    totalSpent,
-    avgOrderValue
+    recommendedProducts: recommendedProducts || [],
+    productList: productList || [],
+    productLists: productLists || [],
   }
-}
-
-// Helper function to get shopping personality
-export function getShoppingPersonality(data: ShopifyWrappedData) {
-  const orderCount = data.orders.length
-  const savedCount = data.savedProducts.length
-  const ratio = savedCount > 0 ? orderCount / savedCount : orderCount
-
-  if (orderCount >= 10 && ratio > 0.5) {
-    return { 
-      type: "The Decisive Shopper", 
-      emoji: "⚡", 
-      description: "You know what you want and you get it!",
-      color: "from-yellow-400 to-orange-500"
-    }
-  } else if (savedCount > orderCount * 2) {
-    return { 
-      type: "The Thoughtful Browser", 
-      emoji: "🤔", 
-      description: "You love to save items for later consideration.",
-      color: "from-blue-400 to-indigo-500"
-    }
-  } else if (orderCount >= 5) {
-    return { 
-      type: "The Regular Shopper", 
-      emoji: "🛒", 
-      description: "Shopping is a regular part of your routine.",
-      color: "from-green-400 to-emerald-500"
-    }
-  } else if (savedCount > 5) {
-    return { 
-      type: "The Wishlist Curator", 
-      emoji: "⭐", 
-      description: "You're building the perfect wishlist!",
-      color: "from-purple-400 to-pink-500"
-    }
-  } else {
-    return { 
-      type: "The Explorer", 
-      emoji: "🔍", 
-      description: "You're just getting started on your shopping journey.",
-      color: "from-teal-400 to-cyan-500"
-    }
-  }
-}
-
-// Helper function to get fun stats
-export function getFunStats(data: ShopifyWrappedData) {
-  const stats = []
-
-  if (data.orders.length > 0) {
-    const mostRecentOrder = data.orders[0]
-    if (mostRecentOrder?.createdAt) {
-      const daysSinceLastOrder = Math.floor(
-        (Date.now() - new Date(mostRecentOrder.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-      )
-      stats.push({
-        label: "Days since last order",
-        value: daysSinceLastOrder,
-        emoji: "📅"
-      })
-    }
-  }
-
-  if (data.savedProducts.length > 0) {
-    stats.push({
-      label: "Items on wishlist",
-      value: data.savedProducts.length,
-      emoji: "💫"
-    })
-  }
-
-  if (data.followedShops.length > 0) {
-    stats.push({
-      label: "Shops you follow",
-      value: data.followedShops.length,
-      emoji: "🏪"
-    })
-  }
-
-  if (data.avgOrderValue > 0) {
-    stats.push({
-      label: "Average order value",
-      value: `$${data.avgOrderValue.toFixed(2)}`,
-      emoji: "💰"
-    })
-  }
-
-  return stats
 }

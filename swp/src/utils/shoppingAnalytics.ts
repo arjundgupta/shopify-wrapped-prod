@@ -6,8 +6,6 @@ export interface Product {
     handle?: string;
     price?: number | { amount?: number | string };
     priceRange?: { minVariantPrice?: { amount?: number | string } };
-    // Added compareAtPrice to support savings calculations from line items
-    compareAtPrice?: number | { amount?: number | string };
     [key: string]: any;
 }
 
@@ -64,54 +62,10 @@ export interface ShoppingData {
 // Shopping Analytics and AI-Generated Insights
 // Calculate money spent this year
 export const calculateMoneySpent = (orders: Order[]): number => {
-    // Helper to safely parse number-like values including Shopify MoneyV2 { amount }
-    const parseAmount = (val: any): number => {
-        if (val === null || val === undefined) return 0;
-        if (typeof val === "number") return isFinite(val) ? val : 0;
-        if (typeof val === "string") {
-            const n = parseFloat(val);
-            return isFinite(n) ? n : 0;
-        }
-        if (typeof val === "object") {
-            const amt = (val as any).amount;
-            if (amt !== undefined) {
-                if (typeof amt === "number") return isFinite(amt) ? amt : 0;
-                if (typeof amt === "string") {
-                    const n = parseFloat(amt);
-                    return isFinite(n) ? n : 0;
-                }
-            }
-        }
-        return 0;
-    };
-
-    const sumFromLineItems = (order: Order): number => {
-        const items = (order?.lineItems ||
-            (order as any)?.line_items ||
-            []) as LineItem[];
-        if (!items?.length) return 0;
-        return items.reduce((acc, item) => {
-            const qty = item?.quantity || 1;
-            const productPrice =
-                parseAmount(item?.product?.price) ||
-                parseAmount(item?.product?.priceRange?.minVariantPrice);
-            const unitPrice = parseAmount(item?.price);
-            const lineTotalRaw = parseAmount((item as any)?.total_price);
-
-            // Prefer product price; then item price; then line total as fallback
-            let lineTotal = 0;
-            if (productPrice > 0) lineTotal = productPrice * qty;
-            else if (unitPrice > 0) lineTotal = unitPrice * qty;
-            else if (lineTotalRaw > 0) lineTotal = lineTotalRaw; // already total for the line
-
-            return acc + lineTotal;
-        }, 0);
-    };
-
     return (
         orders?.reduce((sum, order) => {
             // Try various possible properties for order total
-            const totalCandidate =
+            const total =
                 (order?.total &&
                     (typeof order.total === "object"
                         ? (order.total as any).amount
@@ -123,18 +77,13 @@ export const calculateMoneySpent = (orders: Order[]): number => {
                 order?.total_price ||
                 order?.price ||
                 0;
-
-            const parsedTotal =
-                typeof totalCandidate === "string"
-                    ? parseFloat(totalCandidate)
-                    : typeof totalCandidate === "number"
-                    ? totalCandidate
+            const parsed =
+                typeof total === "string"
+                    ? parseFloat(total)
+                    : typeof total === "number"
+                    ? total
                     : 0;
-
-            // If order total isn't present or is zero, fall back to summing line items
-            const orderTotal =
-                parsedTotal > 0 ? parsedTotal : sumFromLineItems(order);
-            return sum + (isFinite(orderTotal) ? orderTotal : 0);
+            return sum + parsed;
         }, 0) || 0
     );
 };
@@ -202,27 +151,6 @@ export const calculateSavingsStats = (
     discountedOrders: number;
     averageDiscount: number;
 } => {
-    // Helper to safely parse number-like values including Shopify MoneyV2 { amount }
-    const parseAmount = (val: any): number => {
-        if (val === null || val === undefined) return 0;
-        if (typeof val === "number") return isFinite(val) ? val : 0;
-        if (typeof val === "string") {
-            const n = parseFloat(val);
-            return isFinite(n) ? n : 0;
-        }
-        if (typeof val === "object") {
-            const amt = (val as any).amount;
-            if (amt !== undefined) {
-                if (typeof amt === "number") return isFinite(amt) ? amt : 0;
-                if (typeof amt === "string") {
-                    const n = parseFloat(amt);
-                    return isFinite(n) ? n : 0;
-                }
-            }
-        }
-        return 0;
-    };
-
     if (!orders || orders.length === 0) {
         return {
             totalSaved: 0,
@@ -235,52 +163,30 @@ export const calculateSavingsStats = (
     let discountedOrders = 0;
 
     orders.forEach((order) => {
-        let orderSaved = 0;
-
-        // Prefer line item based discount calculation using compareAtPrice vs price
-        const items = (order?.lineItems ||
-            (order as any)?.line_items ||
-            []) as LineItem[];
-        if (items.length > 0) {
-            items.forEach((item) => {
-                const qty = item?.quantity || 1;
-                const price =
-                    parseAmount(item?.product?.price) ||
-                    parseAmount(item?.product?.priceRange?.minVariantPrice) ||
-                    parseAmount(item?.price);
-                const compareAt = parseAmount(item?.product?.compareAtPrice);
-                if (compareAt > price && price > 0) {
-                    orderSaved += (compareAt - price) * qty;
-                }
-            });
-        }
-
-        // Fallbacks: order-level discount fields if present
-        const orderLevelDiscount = parseAmount(
-            (order as any).discountAmount ||
+        const discount = parseFloat(
+            ((order as any).discountAmount ||
                 (order as any).discount_amount ||
-                (order as any).total_discounts
+                (order as any).total_discounts ||
+                0) as any
         );
-        if (orderLevelDiscount > 0) {
-            orderSaved += orderLevelDiscount;
-        } else if (orderSaved === 0) {
-            // Another fallback: if we have original vs sale price at order level
-            const originalPrice = parseAmount(
-                (order as any).originalPrice || (order as any).original_price
-            );
-            const salePrice = parseAmount(
-                order.totalPrice ||
-                    (order as any).total_price ||
-                    (order as any).price
-            );
-            if (originalPrice > salePrice && salePrice > 0) {
-                orderSaved += originalPrice - salePrice;
-            }
-        }
+        const originalPrice = parseFloat(
+            ((order as any).originalPrice ||
+                (order as any).original_price ||
+                0) as any
+        );
+        const salePrice = parseFloat(
+            ((order as any).totalPrice ||
+                (order as any).total_price ||
+                (order as any).price ||
+                0) as any
+        );
 
-        if (orderSaved > 0) {
-            totalSaved += orderSaved;
-            discountedOrders += 1;
+        if (discount > 0) {
+            totalSaved += discount;
+            discountedOrders++;
+        } else if (originalPrice > salePrice && originalPrice > 0) {
+            totalSaved += originalPrice - salePrice;
+            discountedOrders++;
         }
     });
 
