@@ -7,5 +7,6 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   optimizeDeps: {
     include: ['@shopify/shop-minis-react'],
+    exclude: ['html2canvas'],
   },
 })
