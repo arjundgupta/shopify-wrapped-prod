@@ -16,7 +16,7 @@ Swipe through the cards like Instagram stories, then export them as images to sh
 
 ## Tech
 
-react, typescript, tailwind css v4, vite, and the shop minis sdk (`@shopify/shop-minis-react`)
+react, typescript, tailwind v4, vite, and the shop minis sdk (`@shopify/shop-minis-react`)
 
 ## Structure
 
