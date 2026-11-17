@@ -14,10 +14,6 @@ A Spotify Wrapped style year in review for your Shopify purchases. It runs as a 
 
 Swipe through the cards like Instagram stories, then export them as images to share.
 
-## Tech
-
-React, TypeScript, Tailwind CSS v4, Vite, and the Shop Minis SDK (`@shopify/shop-minis-react`).
-
 ## Structure
 
 ```
